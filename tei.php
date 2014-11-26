@@ -10,8 +10,39 @@
  */
 include 'xml_transform.php';
 
+//add quotation
+add_shortcode( 'teiquote', 'teiquote_shortcode');
+
+
+//add in the visualisation
 add_shortcode( 'tei', 'tei_shortcode' );
 
+// short code to put in the quote text
+function teiquote_shortcode($atts) {
+  extract(
+    shortcode_atts(
+      array(
+        'id' => '',
+        'start' => '',
+        'end' => '',
+      ),
+      $atts)
+  );
+ $quote = extract_quotation ($atts['id'], $atts['start'], $atts['end']);
+ $t = '';
+ foreach ($quote as $line=>$text) {
+    $t .= $text['lineno']." &nbsp;". $text['text'] ."<br />";
+    $act = $text['act'];
+    $scene = $text['scene'];
+ }
+ $line = (sizeof($quote) > 1) ? $quote[0]['lineno'] .'-'. $quote[max(array_keys($quote))]['lineno'] : $quote[0]['lineno'];
+ return "<blockquote>". $t ."
+<footer>
+$act : $scene : $line <br />
+<a href='http://firstfolio.bodleian.ox.ac.uk'>".cite()."</a>
+</footer>
+</blockquote>";
+}
 /**
 * Shortcode creation function to get the correct text
 * from the store

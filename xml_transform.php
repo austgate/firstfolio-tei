@@ -1,4 +1,50 @@
 <?php
+// should this just be a public string?
+function cite() {
+ return "Digital facsimile of the Bodleian First Folio of Shakespeare's plays, Arch. G c.7";
+}
+
+// extract a line or block quotes
+function extract_quotation ($short, $start, $end) {
+
+  $xml_str = open_file($short);
+
+  $reader = new XMLReader();
+
+  if (!$reader->open($xml_str)) {
+    die("Failed to open First Folio");
+  }
+  $act = $scene = $line = 0;
+  $lines = [];
+  while($reader->read()) {
+
+  if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'div') {
+        $divtype = $reader->getAttribute('type');
+        if ($divtype == 'act') {
+          $act = $reader->getAttribute('n');
+        }
+        if ($divtype == 'scene') {
+          $scene = $reader->getAttribute('n');
+        }
+      }
+
+    // get the lines
+    if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'l') {
+       $line = $reader->getAttribute('n');
+       if ($end && ($line >=  $start && $line <= $end)) {
+           $lines[] = array('act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
+       } else if ($start && !$end) {
+           if ($line == $start) { 
+              $lines[] = array('act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
+           }
+       }
+    }
+  }
+  $reader->close();
+
+  return $lines;
+}
+
 // extract data takes the short code and converts into a url
 function extract_data ($short) {
 
