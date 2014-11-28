@@ -21,7 +21,7 @@ function extract_quotation ($short, $start, $end) {
   
   if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'title') {
       if ($reader->getAttribute('type')=='statement' && !$title) {
-          $title = $reader-> readString();
+          $title = $reader->readString();
       }
   } 
 
