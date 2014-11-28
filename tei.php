@@ -31,14 +31,15 @@ function teiquote_shortcode($atts) {
  $quote = extract_quotation ($atts['id'], $atts['start'], $atts['end']);
  $t = '';
  foreach ($quote as $line=>$text) {
-    $t .= $text['lineno']." &nbsp;". $text['text'] ."<br />";
+    $t .= $text['text'] ."<br />";
     $act = $text['act'];
     $scene = $text['scene'];
  }
- $line = (sizeof($quote) > 1) ? $quote[0]['lineno'] .'-'. $quote[max(array_keys($quote))]['lineno'] : $quote[0]['lineno'];
+ $title = $quote[0]['title'];
+ $line = (sizeof($quote) > 1) ? $quote[0]['lineno'] .'&ndash;'. $quote[max(array_keys($quote))]['lineno'] : $quote[0]['lineno'];
  return "<blockquote>". $t ."
 <footer>
-$act : $scene : $line <br />
+$title ($act . $scene . $line) <br />
 <a href='http://firstfolio.bodleian.ox.ac.uk'>".cite()."</a>
 </footer>
 </blockquote>";
