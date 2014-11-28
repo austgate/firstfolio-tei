@@ -16,7 +16,14 @@ function extract_quotation ($short, $start, $end) {
   }
   $act = $scene = $line = 0;
   $lines = [];
+  $title = '';
   while($reader->read()) {
+  
+  if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'title') {
+      if ($reader->getAttribute('type')=='statement' && !$title) {
+          $title = $reader-> readString();
+      }
+  } 
 
   if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'div') {
         $divtype = $reader->getAttribute('type');
@@ -32,10 +39,10 @@ function extract_quotation ($short, $start, $end) {
     if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'l') {
        $line = $reader->getAttribute('n');
        if ($end && ($line >=  $start && $line <= $end)) {
-           $lines[] = array('act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
+           $lines[] = array('title'=>$title,'act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
        } else if ($start && !$end) {
            if ($line == $start) { 
-              $lines[] = array('act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
+              $lines[] = array('title'=>$title,'act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
            }
        }
     }
