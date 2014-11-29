@@ -97,14 +97,9 @@ function extract_data ($short) {
     if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'sp') {
        $speaker = $reader->getAttribute('who');
     }
-    // get the scene
-    if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'stage') {
-       $type = $readertype = $reader->getAttribute('type');
-       $scen = $type.'::'.$reader->readString();
-    }
-    //$ycoord = $act . $scene . $line;
+    
     $ycoord = $line;
-    $play{$ycoord} = array('scene'=> $scen, 'speaker'=>substr($speaker, 1));
+    $play{$ycoord} = array('speaker'=>substr($speaker, 1));
   }
   $reader->close();
   
@@ -138,9 +133,5 @@ function transform_coords ($drama, $people) {
 function open_file($code) {
    return "http://firstfolio.bodleian.ox.ac.uk/download/xml/F-$code.xml";
 }
-
-/*list($people, $play) = extract_data();
-list($label, $xcoord) = mungex($people);
-list ($x,$y) = mungey($play, $people);*/
 
 ?>

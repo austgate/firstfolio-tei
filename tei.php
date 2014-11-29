@@ -13,9 +13,20 @@ include 'xml_transform.php';
 //add quotation
 add_shortcode( 'teiquote', 'teiquote_shortcode');
 
-
 //add in the visualisation
 add_shortcode( 'tei', 'tei_shortcode' );
+
+// register and queue the relevant scripts. 
+function add_tei_js() {
+  //load the dependencies
+  wp_register_script('D3', 'http://d3js.org/d3.v3.min.js');
+  wp_enqueue_script('D3');
+  //load module specific JS
+  wp_register_script('dna', plugins_url('tei/graph.js'), __FILE__);
+  wp_enqueue_script('dna');
+}
+
+add_action('init','add_tei_js');
 
 // short code to put in the quote text
 function teiquote_shortcode($atts) {
@@ -69,8 +80,6 @@ function tei_shortcode($atts) {
  return "
 <div id='ffvis'>
 </div>
-<script src='http://d3js.org/d3.v3.min.js'></script>
-<script src='../dnagraph/graph.js'></script>
 <script>
 dna_graph($y, $x, $label);
 </script>
