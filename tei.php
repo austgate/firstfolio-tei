@@ -93,12 +93,11 @@ function tei_shortcode($atts) {
  list($people, $play) = extract_data($atts['id']);
  $label = transform_labels($people);
  list ($x,$y) = transform_coords($play, $people);
-
- return "
-<div id='ffvis'>
-</div>
+ $id = $atts['id'];
+ return "<div id='result'></div>
+<div id='ffvis'></div>
 <script>
-dna_graph($y, $x, $label);
+dna_graph($y, $x, $label,'$id');
 </script>
 "; //return the javascript here from dnagraph
 }
