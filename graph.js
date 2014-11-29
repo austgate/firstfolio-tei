@@ -4,9 +4,11 @@
 var xcoords, ycoords, labels;
 /* 
  * Function to show a graph that looks like a DNA trace
- * 
+ * Plots line numbers against the characters in a play
+ *
+ * Provides a very simple search API as well
  */
-function dna_graph(xcoords, ycoords, labels) {
+function dna_graph(xcoords, ycoords, labels, shortcode) {
 
 	var xdata = xcoords,
 	    ydata = ycoords,
@@ -20,7 +22,7 @@ function dna_graph(xcoords, ycoords, labels) {
 	    var x = d3.scale.linear()
 	              .domain([0, 2500]) //xdata not 2500
 	              .range([ 0, 2500 ]);
-	    console.log(xdata);
+	    
 	    var y = d3.scale.linear()
 	    	      .domain([-1, 18])
 	    	      .range([ height, 0 ]);
@@ -62,7 +64,7 @@ function dna_graph(xcoords, ycoords, labels) {
 		.call(yAxis);
 
 	    var g = main.append("svg:g"); 
-	    
+	   //refactor me!! 
 	    g.selectAll("scatter-dots")
 	      .data(ydata)
 	      .enter().append("svg:circle")
@@ -70,6 +72,13 @@ function dna_graph(xcoords, ycoords, labels) {
 	          .attr("cx", function (d,i) { return x(xdata[i]); } )
 	          .attr("r", 6)
 	          .style("opacity", 0.6)
-	          .text(function(d) {return labellist[d] +' occurs at event ' +d})
-	          ;   
+                  .on("mouseover", function(d,i){
+d3.json("wp-content/plugins/tei/teisearch.php?t="+ shortcode +"&no="+i, 
+  function (error, json) {
+    if (error) d3.select("#result").text("error occured");
+    d3.select("#result").text(json[0].text + " " + json[0].title + " " + json[0].act +"."+json[0].scene+"."+json[0].lineno);
+  });
+
+})
+                  .on("mouseout", function(){d3.select("#result").text("");});
 }
