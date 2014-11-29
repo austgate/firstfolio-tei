@@ -66,7 +66,7 @@ function teiquote_shortcode($atts) {
  $title = $quote[0]['title'];
  $line = (sizeof($quote) > 1) ? $quote[0]['lineno'] .'&ndash;'. $quote[max(array_keys($quote))]['lineno'] : $quote[0]['lineno'];
  return "<blockquote>". $t ."
-<footer>
+<br /><footer>
 $title ($act . $scene . $line) <br />
 <a href='http://firstfolio.bodleian.ox.ac.uk'>".cite()."</a>
 </footer>
