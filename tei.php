@@ -57,20 +57,33 @@ function teiquote_shortcode($atts) {
       $atts)
   );
  $quote = extract_quotation ($atts['id'], $atts['start'], $atts['end']);
- $t = '';
- foreach ($quote as $line=>$text) {
-    $t .= $text['text'] ."<br />";
-    $act = $text['act'];
-    $scene = $text['scene'];
- }
- $title = $quote[0]['title'];
- $line = (sizeof($quote) > 1) ? $quote[0]['lineno'] .'&ndash;'. $quote[max(array_keys($quote))]['lineno'] : $quote[0]['lineno'];
- return "<blockquote>". $t ."
-<br /><footer>
-$title ($act . $scene . $line) <br />
-<a href='http://firstfolio.bodleian.ox.ac.uk'>".cite()."</a>
-</footer>
-</blockquote>";
+ return format_citation(sizeof($quote), $quote);
+}
+
+// function to format the quotation
+function format_citation($length, $quotation) {
+  if ($length == '1') {
+    return '"'. $quotation[0]['text'] .'"'. $quotation[0]['title'] .' ('.$quotation[0]['act'].'.' . $quotation[0]['scene'].'.' . $quotation[0]['lineno'].')';
+  } else if ($length == '2') {
+    return '"'. $quotation[0]['text'] . '\\'. $quotation[1]['text'] .'"'. $quotation[0]['title'] 
+           .'('.$quotation[0]['act'].'.' . $quotation[0]['scene'] .'.' . $quotation[0]['lineno'] .'-'.$quotation[0]['lineno']. ')'; 
+  } else {
+    $t = '';
+    foreach ($quotation as $line=>$text) {
+      $t .= $text['text'] ."<br />";
+      $act = $text['act'];
+      $scene = $text['scene'];
+    }
+
+    $title = $quotation[0]['title'];
+    $line =  $quotation[0]['lineno'] .'&ndash;'. $quotation[max(array_keys($quotation))]['lineno'];
+    return "<blockquote>". $t ."
+      <br /><footer>
+       $title ($act . $scene . $line) <br />
+      <a href='http://firstfolio.bodleian.ox.ac.uk'>".cite()."</a>
+      </footer>
+      </blockquote>";
+  }
 }
 /**
 * Shortcode creation function to get the correct text
