@@ -15,7 +15,7 @@ function extract_quotation ($short, $start, $end) {
     die("Failed to open First Folio");
   }
   $act = $scene = $line = 0;
-  $lines = [];
+  $lines = array();
   $title = '';
   while($reader->read()) {
   
@@ -36,13 +36,22 @@ function extract_quotation ($short, $start, $end) {
       }
 
     // get the lines
-    if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'l') {
+    if ($reader->nodeType == XMLReader::ELEMENT && ($reader->name == 'l' || $reader->name == 'p')) {
        $line = $reader->getAttribute('n');
+       $node = new SimpleXMLElement($reader->readOuterXML());
        if ($end && ($line >=  $start && $line <= $end)) {
-           $lines[] = array('title'=>$title,'act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
+         if ($node->choice) {
+           $lines[] = array('type'=>$reader->name,'title'=>$title,'act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString(), 'orig'=>$node->choice->orig, 'corr'=>$node->choice->corr);
+         } else {
+           $lines[] = array('type'=>$reader->name,'title'=>$title,'act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
+         }
        } else if ($start && !$end) {
-           if ($line == $start) { 
-              $lines[] = array('title'=>$title,'act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
+           if ($line == $start) {
+              if ($node->choice) {
+                $lines[] = array('type'=>$reader->name,'title'=>$title,'act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString(), 'orig'=>$node->choice->orig, 'corr'=>$node->choice->corr);
+              } else {
+                $lines[] = array('type'=>$reader->name,'title'=>$title,'act'=>$act, 'scene'=> $scene, 'lineno'=> $line, 'text'=>$reader->readString());
+              }
            }
        }
     }
@@ -65,7 +74,7 @@ function extract_data ($short) {
   $pid = $act = $scene = $line = 0;
   $play = [];
   $person = [];
-  $speaker = $scen = '';
+  $speaker = $scen = $type= '';
   $id = $name = '';
   while($reader->read()) {
     if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'person') {
@@ -90,8 +99,13 @@ function extract_data ($short) {
       }
     }*/
     // get the lines
-    if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'l') {
+    if ($reader->nodeType == XMLReader::ELEMENT && ($reader->name == 'l' || $reader->name=='p')) {
        $line = $reader->getAttribute('n');
+       if ($reader->name == 'l') {
+          $type = ($reader->getAttribute('rhyme')) ? 'rhyme' : 'blank' ;
+       } else {
+          $type = $reader->name;
+       }
     }
     // get the speaker
     if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'sp') {
@@ -99,7 +113,7 @@ function extract_data ($short) {
     }
     
     $ycoord = $line;
-    $play{$ycoord} = array('speaker'=>substr($speaker, 1));
+    $play{$ycoord} = array('speaker'=>substr($speaker, 1),'type'=>$type);
   }
   $reader->close();
   
@@ -122,16 +136,19 @@ function transform_labels ($people) {
 function transform_coords ($drama, $people) {
    $xcoords = '[';
    $ycoords = '[';
+   $types = '[';
    foreach ($drama as $line => $value) {
       $xcoords .= "'".$people[$value['speaker']]['id']."',";
       $ycoords .= "'$line',";
+      $types .= "'". $value['type']."',";
    }
-   return array(substr($xcoords, 0, -1)."]",substr($ycoords, 0, -1)."]" );
+   return array(substr($xcoords, 0, -1)."]",substr($ycoords, 0, -1)."]", substr($types, 0,-1)."]" );
 }
 // convert the short code string into a valid URL
 // @todo does this need to be in a setting in admin rather than hardcoded?
 function open_file($code) {
-   return "http://firstfolio.bodleian.ox.ac.uk/download/xml/F-$code.xml";
+   return "http://localhost/~iainemsley/text/F-$code.xml"; 
+   #return "http://firstfolio.bodleian.ox.ac.uk/download/xml/F-$code.xml";
 }
 
 ?>
