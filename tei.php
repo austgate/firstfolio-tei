@@ -57,33 +57,51 @@ function teiquote_shortcode($atts) {
       $atts)
   );
  $quote = extract_quotation ($atts['id'], $atts['start'], $atts['end']);
- return format_citation(sizeof($quote), $quote);
+ return format_citation(sizeof($quote), $quote,$atts['id']);
 }
 
 // function to format the quotation
-function format_citation($length, $quotation) {
+function format_citation($length, $quotation,$id) {
   if ($length == '1') {
-    return '"'. $quotation[0]['text'] .'"'. $quotation[0]['title'] .' ('.$quotation[0]['act'].'.' . $quotation[0]['scene'].'.' . $quotation[0]['lineno'].')';
+    return '"'. format_text($quotation[0]) .'" ' . '[' .format_title($id). '] '. $quotation[0]['title'] .' ('.$quotation[0]['act'].'.' . $quotation[0]['scene'].'.' . $quotation[0]['lineno'].')';
   } else if ($length == '2') {
-    return '"'. $quotation[0]['text'] . '\\'. $quotation[1]['text'] .'"'. $quotation[0]['title'] 
-           .'('.$quotation[0]['act'].'.' . $quotation[0]['scene'] .'.' . $quotation[0]['lineno'] .'-'.$quotation[0]['lineno']. ')'; 
+    return '"'. format_text($quotation[0]) . '/'. format_text($quotation[1]) .'" ' . '[' .format_title($id). '] '. $quotation[0]['title'] 
+           .' ('.$quotation[0]['act'].'.' . $quotation[0]['scene'] .'.' . $quotation[0]['lineno'] .'-'.$quotation[1]['lineno']. ')'; 
   } else {
     $t = '';
     foreach ($quotation as $line=>$text) {
-      $t .= $text['text'] ."<br />";
+      $t .= format_text($text) ."<br />";
       $act = $text['act'];
       $scene = $text['scene'];
     }
-
+    $name = format_title($id);
     $title = $quotation[0]['title'];
     $line =  $quotation[0]['lineno'] .'&ndash;'. $quotation[max(array_keys($quotation))]['lineno'];
-    return "<blockquote>". $t ."
+    return "<blockquote> $t
       <br /><footer>
-       $title ($act . $scene . $line) <br />
+      [$name] $title ($act . $scene . $line) <br />
       <a href='http://firstfolio.bodleian.ox.ac.uk'>".cite()."</a>
       </footer>
       </blockquote>";
   }
+}
+
+//function to return the better known name
+function format_title($id) {
+   $title= array(
+     '1ham' => 'Hamlet',
+     'ham' => 'Hamlet',
+   );
+   return $title[$id];
+}
+
+//function to set the title tooltip
+function format_text($textln) {
+  if ($textln['orig']) {
+    $text=str_replace($textln['orig'], '', $textln['text']);
+    return str_replace($textln['corr'], '<span title="'.$textln['orig'].'" style="text-decoration:underline">'.$textln['corr'].'</span>', $text);
+  } 
+  return $textln['text'];
 }
 /**
 * Shortcode creation function to get the correct text
@@ -105,12 +123,13 @@ function tei_shortcode($atts) {
 
  list($people, $play) = extract_data($atts['id']);
  $label = transform_labels($people);
- list ($x,$y) = transform_coords($play, $people);
+ list ($x,$y,$types) = transform_coords($play, $people);
  $id = $atts['id'];
- return "<div id='result'></div>
+ return "
 <div id='ffvis'></div>
 <script>
-dna_graph($y, $x, $label,'$id');
+dna_graph($y, $x, $label,'$id', $types);
 </script>
+<div id='result'></div>
 "; //return the javascript here from dnagraph
 }
